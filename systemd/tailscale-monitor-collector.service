@@ -1,0 +1,33 @@
+[Unit]
+Description=Tailscale Network Monitor Collector
+After=network.target
+Documentation=https://github.com/yourusername/tailscale-monitor
+
+[Service]
+Type=simple
+User=tailscale-monitor
+Group=tailscale-monitor
+WorkingDirectory=/opt/tailscale-monitor/collector
+Environment="PATH=/opt/tailscale-monitor/collector/venv/bin:/usr/local/bin:/usr/bin:/bin"
+Environment="DATABASE_PATH=/var/lib/tailscale-monitor/metrics.db"
+Environment="HOST=0.0.0.0"
+Environment="PORT=8080"
+ExecStart=/opt/tailscale-monitor/collector/venv/bin/python /opt/tailscale-monitor/collector/src/main.py
+Restart=always
+RestartSec=10
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=tsmon-collector
+
+# Security hardening
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=true
+ReadWritePaths=/var/lib/tailscale-monitor /var/log/tailscale-monitor
+ProtectKernelTunables=true
+ProtectKernelModules=true
+ProtectControlGroups=true
+
+[Install]
+WantedBy=multi-user.target

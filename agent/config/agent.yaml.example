@@ -1,0 +1,18 @@
+# Example configuration for agent
+# Copy to /etc/tailscale-monitor/agent.yaml and modify
+
+collector:
+  url: "http://100.113.155.67:8080"  # Your collector URL
+  api_key: null  # Will be set automatically on first run
+  timeout: 5
+  retry_attempts: 3
+
+monitoring:
+  interval: 25  # Seconds between metric collections
+  interface: tailscale0  # Leave null for auto-detection
+
+logging:
+  level: INFO  # DEBUG, INFO, WARNING, ERROR
+  file: /var/log/tailscale-monitor/agent.log
+  max_size_mb: 10
+  backup_count: 3

@@ -1,0 +1,27 @@
+[Unit]
+Description=Tailscale Network Monitor Agent
+After=network.target tailscaled.service
+Wants=tailscaled.service
+Documentation=https://github.com/yourusername/tailscale-monitor
+
+[Service]
+Type=simple
+User=root
+Group=root
+WorkingDirectory=/opt/tailscale-monitor/agent
+Environment="PATH=/opt/tailscale-monitor/agent/venv/bin:/usr/local/bin:/usr/bin:/bin"
+Environment="AGENT_CONFIG=/etc/tailscale-monitor/agent.yaml"
+ExecStart=/opt/tailscale-monitor/agent/venv/bin/python /opt/tailscale-monitor/agent/src/main.py
+Restart=always
+RestartSec=10
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=tsmon-agent
+
+# Need root for network monitoring
+# Less security hardening than collector since we need network access
+NoNewPrivileges=true
+PrivateTmp=true
+
+[Install]
+WantedBy=multi-user.target
