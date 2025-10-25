@@ -114,31 +114,43 @@ echo -e "${YELLOW}Creating directories...${NC}"
 mkdir -p "$INSTALL_DIR"/{src,config}
 mkdir -p "$CONFIG_DIR"
 mkdir -p "$LOG_DIR"
+mkdir -p /tmp/tsmon-install
 echo -e "${GREEN}✓${NC} Directories created\n"
 
-# Download agent files from collector
-echo -e "${YELLOW}Downloading agent files from collector...${NC}"
+# Download agent files
+echo -e "${YELLOW}Downloading agent files...${NC}"
 
-# Try to fetch from collector or use local files
+# Check collector health
 if curl -f -s "${COLLECTOR_URL}/api/v1/health" > /dev/null 2>&1; then
     echo -e "${GREEN}✓${NC} Collector is reachable"
-    
-    # For now, check if we have local files
-    if [ -d "$(dirname "$0")/../agent" ]; then
-        SOURCE_DIR="$(cd "$(dirname "$0")/.." && pwd)"
-        echo -e "${BLUE}Installing from local source${NC}"
-        
-        cp -r "$SOURCE_DIR/agent/src" "$INSTALL_DIR/"
-        cp "$SOURCE_DIR/agent/requirements.txt" "$INSTALL_DIR/"
-        cp -r "$SOURCE_DIR/shared" "$(dirname "$INSTALL_DIR")/"
-    else
-        echo -e "${RED}Error: Agent source files not found${NC}"
-        exit 1
-    fi
 else
     echo -e "${RED}Error: Cannot reach collector at $COLLECTOR_URL${NC}"
     exit 1
 fi
+
+# Download from GitHub
+GITHUB_REPO="https://github.com/saitama142/Tailscale-Network-Traffic-Monitor"
+TEMP_DIR="/tmp/tsmon-install"
+
+echo -e "${BLUE}Downloading from GitHub...${NC}"
+cd /tmp
+rm -rf tsmon-install
+git clone --depth 1 --quiet "$GITHUB_REPO" tsmon-install 2>/dev/null || {
+    # Fallback to wget/curl
+    curl -fsSL "${GITHUB_REPO}/archive/refs/heads/master.tar.gz" -o tsmon.tar.gz
+    tar xzf tsmon.tar.gz
+    mv Tailscale-Network-Traffic-Monitor-master tsmon-install
+    rm tsmon.tar.gz
+}
+
+# Copy files
+cp -r "$TEMP_DIR/agent/src" "$INSTALL_DIR/"
+cp "$TEMP_DIR/agent/requirements.txt" "$INSTALL_DIR/"
+mkdir -p "$(dirname "$INSTALL_DIR")/shared"
+cp -r "$TEMP_DIR/shared/"* "$(dirname "$INSTALL_DIR")/shared/"
+
+# Cleanup
+rm -rf "$TEMP_DIR"
 
 echo -e "${GREEN}✓${NC} Files installed\n"
 
