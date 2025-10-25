@@ -82,7 +82,7 @@ fi
 
 # Create directories
 echo -e "\n${YELLOW}Creating directories...${NC}"
-mkdir -p "$INSTALL_DIR"/{collector,cli,shared}
+mkdir -p "$INSTALL_DIR"/{collector,cli,shared,scripts}
 mkdir -p "$CONFIG_DIR"
 mkdir -p "$DATA_DIR"
 mkdir -p "$LOG_DIR"
@@ -100,6 +100,7 @@ if [ -d "$(dirname "$0")/../collector" ]; then
     cp -r "$SOURCE_DIR/collector"/* "$INSTALL_DIR/collector/"
     cp -r "$SOURCE_DIR/shared" "$INSTALL_DIR/"
     cp -r "$SOURCE_DIR/cli"/* "$INSTALL_DIR/cli/"
+    cp -r "$SOURCE_DIR/scripts"/*.sh "$INSTALL_DIR/scripts/"
 else
     echo -e "${RED}Error: Source files not found${NC}"
     echo -e "Please run this script from the project directory"
