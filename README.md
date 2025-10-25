@@ -26,7 +26,7 @@ cd Tailscale-Network-Traffic-Monitor
 sudo bash scripts/install-collector.sh
 ```
 
-The collector will be available at `http://<tailscale-ip>:8080`
+The collector will be available at `http://<tailscale-ip>:48321`
 
 ### 2. Install Agents (Monitored Machines)
 
@@ -34,7 +34,7 @@ On each machine you want to monitor:
 
 ```bash
 # Get your collector's Tailscale IP first, then run:
-COLLECTOR_URL=http://100.x.x.x:8080 curl -fsSL http://100.x.x.x:8080/install/agent.sh | sudo bash
+COLLECTOR_URL=http://100.x.x.x:48321 curl -fsSL http://100.x.x.x:48321/install/agent.sh | sudo bash
 ```
 
 Or use the CLI to generate the exact command:
@@ -73,7 +73,7 @@ The API is designed for easy integration with dashboards, widgets (like Glance),
 
 ### Base URL
 ```
-http://<collector-tailscale-ip>:8080
+http://<collector-tailscale-ip>:48321
 ```
 
 ### Public Endpoints (No Auth Required)
@@ -113,7 +113,7 @@ Returns: `{"agent_id": "...", "api_key": "...", "message": "..."}`
 
 All other endpoints require an API key in the header:
 ```bash
-curl -H "X-API-Key: your-api-key-here" http://collector:8080/api/v1/agents
+curl -H "X-API-Key: your-api-key-here" http://collector:48321/api/v1/agents
 ```
 
 #### `GET /api/v1/agents`
@@ -227,7 +227,7 @@ Submit metrics (agents use this automatically)
 
 ### Interactive API Docs
 
-Visit `http://<collector-ip>:8080/docs` for interactive Swagger documentation where you can test all endpoints.
+Visit `http://<collector-ip>:48321/docs` for interactive Swagger documentation where you can test all endpoints.
 
 ## 🔐 Authentication
 
@@ -244,7 +244,7 @@ To use the API from external tools (like Glance widgets):
 
 2. Use it in API calls:
    ```bash
-   curl -H "X-API-Key: your-key-here" http://collector:8080/api/v1/dashboard
+   curl -H "X-API-Key: your-key-here" http://collector:48321/api/v1/dashboard
    ```
 
 **Note:** Currently, all agents share the same API key pool. For production use with external integrations, consider generating a dedicated API key via the registration endpoint with a custom hostname.
@@ -270,7 +270,7 @@ sudo journalctl -u tailscale-monitor-agent -f
 - **Agent**: `/etc/tailscale-monitor/agent.yaml`
   ```yaml
   collector:
-    url: "http://100.x.x.x:8080"
+    url: "http://100.x.x.x:48321"
     api_key: "auto-generated"
     timeout: 5
     retry_attempts: 3
@@ -363,7 +363,7 @@ This checks:
 sudo journalctl -u tailscale-monitor-agent -n 50
 
 # Verify collector is reachable
-curl http://<collector-ip>:8080/api/v1/health
+curl http://<collector-ip>:48321/api/v1/health
 
 # Check Tailscale connectivity
 tailscale status
@@ -379,7 +379,7 @@ sudo ls -lh /var/lib/tailscale-monitor/metrics.db
 
 # Test API
 curl -H "X-API-Key: $(sudo grep api_key /etc/tailscale-monitor/agent.yaml | awk '{print $2}')" \
-  http://<collector-ip>:8080/api/v1/agents
+  http://<collector-ip>:48321/api/v1/agents
 ```
 
 ### Service not starting

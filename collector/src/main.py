@@ -9,9 +9,9 @@ from fastapi.responses import PlainTextResponse, JSONResponse
 from contextlib import asynccontextmanager
 
 # Add parent directory to path
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), '../..'))
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.dirname(__file__))))
 
-from shared.constants import API_PREFIX, CLI_VERSION
+from shared.constants import API_PREFIX, CLI_VERSION, DEFAULT_COLLECTOR_PORT
 from collector.src.api import router
 from collector.src.database import get_database
 
@@ -101,7 +101,7 @@ if __name__ == "__main__":
     import uvicorn
     
     host = os.getenv("HOST", "0.0.0.0")
-    port = int(os.getenv("PORT", "8080"))
+    port = int(os.getenv("PORT", str(DEFAULT_COLLECTOR_PORT)))
     
     logger.info(f"Starting server on {host}:{port}")
     

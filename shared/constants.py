@@ -3,7 +3,7 @@ Shared constants for Tailscale Network Monitor.
 """
 
 # API Configuration
-DEFAULT_COLLECTOR_PORT = 8080
+DEFAULT_COLLECTOR_PORT = 48321
 API_VERSION = "v1"
 API_PREFIX = f"/api/{API_VERSION}"
 

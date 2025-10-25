@@ -30,16 +30,23 @@ if [ "$EUID" -ne 0 ]; then
     exit 1
 fi
 
-# Check for required environment variable
-if [ -z "$COLLECTOR_URL" ]; then
+# Check for required environment variable or first argument
+if [ -n "$1" ]; then
+    COLLECTOR_URL="$1"
+elif [ -n "$COLLECTOR_URL" ]; then
+    # Already set, use it
+    :
+else
     echo -e "${YELLOW}COLLECTOR_URL not set, using interactive mode${NC}\n"
-    read -p "Enter collector URL (e.g., http://100.113.155.67:8080): " COLLECTOR_URL
+    read -p "Enter collector URL (e.g., http://100.113.155.67:48321): " COLLECTOR_URL
     
     if [ -z "$COLLECTOR_URL" ]; then
         echo -e "${RED}Error: Collector URL is required${NC}"
         exit 1
     fi
 fi
+
+echo -e "${GREEN}✓${NC} Collector URL: $COLLECTOR_URL\n"
 
 # Detect OS
 if [ -f /etc/os-release ]; then

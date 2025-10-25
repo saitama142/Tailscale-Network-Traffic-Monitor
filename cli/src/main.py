@@ -20,7 +20,17 @@ import subprocess
 # Add parent directory to path
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..'))
 
-from shared.constants import CLI_NAME, CLI_VERSION
+from shared.constants import CLI_NAME, CLI_VERSION, DEFAULT_COLLECTOR_PORT
+
+def version_callback(value: bool):
+    """Callback to show version and exit."""
+    if value:
+        console.print(Panel.fit(
+            f"[bold cyan]{CLI_NAME}[/bold cyan] v{CLI_VERSION}\n"
+            f"Tailscale Network Traffic Monitor",
+            border_style="cyan"
+        ))
+        raise typer.Exit()
 
 app = typer.Typer(
     name=CLI_NAME,
@@ -45,10 +55,10 @@ def get_collector_url() -> str:
                 import re
                 match = re.search(r'inet (\d+\.\d+\.\d+\.\d+)', result.stdout)
                 if match:
-                    default_url = f"http://{match.group(1)}:8080"
+                    default_url = f"http://{match.group(1)}:{DEFAULT_COLLECTOR_PORT}"
         except:
             pass
-    return default_url or "http://localhost:8080"
+    return default_url or f"http://localhost:{DEFAULT_COLLECTOR_PORT}"
 
 
 def check_collector_running() -> bool:
@@ -62,6 +72,21 @@ def check_collector_running() -> bool:
         return result.returncode == 0
     except Exception:
         return False
+
+
+@app.callback()
+def main(
+    version: Optional[bool] = typer.Option(
+        None,
+        "--version",
+        "-v",
+        help="Show version and exit",
+        callback=version_callback,
+        is_eager=True
+    )
+):
+    """Tailscale Network Traffic Monitor CLI"""
+    pass
 
 
 @app.command()
@@ -271,6 +296,54 @@ def generate_install():
         console.print(f"  {install_cmd}\n")
     
     console.print("[yellow]Note:[/yellow] The agent will automatically register with the collector on first run.")
+
+
+@app.command(name="install-agent")
+def install_agent(
+    hostname: str = typer.Argument(..., help="Target hostname or IP (via SSH)"),
+    user: Optional[str] = typer.Option(None, "--user", "-u", help="SSH username (default: current user)")
+):
+    """Install agent on a remote machine via SSH (simpler than generate-install)."""
+    import getpass
+    
+    collector_url = get_collector_url()
+    ssh_user = user or getpass.getuser()
+    
+    console.print(Panel.fit(
+        f"[bold cyan]Installing Agent on {hostname}[/bold cyan]",
+        border_style="cyan"
+    ))
+    
+    console.print(f"\n[dim]SSH User:[/dim] {ssh_user}")
+    console.print(f"[dim]Collector:[/dim] {collector_url}\n")
+    
+    # Create the install command
+    install_cmd = (
+        f"curl -fsSL {collector_url}/install/agent.sh | "
+        f"sudo bash -s -- {collector_url}"
+    )
+    
+    ssh_cmd = [
+        "ssh", "-t",
+        f"{ssh_user}@{hostname}",
+        install_cmd
+    ]
+    
+    console.print("[yellow]Running installation via SSH...[/yellow]\n")
+    
+    try:
+        result = subprocess.run(ssh_cmd)
+        if result.returncode == 0:
+            console.print("\n[green]✓[/green] Agent installed successfully!")
+        else:
+            console.print("\n[red]✗[/red] Installation failed")
+            raise typer.Exit(code=1)
+    except KeyboardInterrupt:
+        console.print("\n[yellow]Installation cancelled[/yellow]")
+        raise typer.Exit(code=1)
+    except Exception as e:
+        console.print(f"\n[red]Error: {e}[/red]")
+        raise typer.Exit(code=1)
 
 
 @app.command()

@@ -186,13 +186,13 @@ echo -e "${GREEN}Installation Complete!${NC}"
 echo -e "${GREEN}========================================${NC}\n"
 
 echo -e "${BLUE}Collector is running at:${NC}"
-echo -e "  Local: http://localhost:8080"
+echo -e "  Local: http://localhost:48321"
 if [ "$TAILSCALE_IP" != "unknown" ]; then
-    echo -e "  Tailscale: http://$TAILSCALE_IP:8080"
+    echo -e "  Tailscale: http://$TAILSCALE_IP:48321"
 fi
 
 echo -e "\n${BLUE}API Documentation:${NC}"
-echo -e "  http://localhost:8080/docs"
+echo -e "  http://localhost:48321/docs"
 
 echo -e "\n${BLUE}CLI Commands:${NC}"
 echo -e "  tsmon agents              - List all agents"
