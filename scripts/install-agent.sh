@@ -149,6 +149,10 @@ cp "$TEMP_DIR/agent/requirements.txt" "$INSTALL_DIR/"
 mkdir -p "$(dirname "$INSTALL_DIR")/shared"
 cp -r "$TEMP_DIR/shared/"* "$(dirname "$INSTALL_DIR")/shared/"
 
+# Copy systemd service file
+mkdir -p /tmp/tsmon-systemd
+cp "$TEMP_DIR/systemd/tailscale-monitor-agent.service" /tmp/tsmon-systemd/
+
 # Cleanup
 rm -rf "$TEMP_DIR"
 
@@ -186,13 +190,19 @@ echo -e "${GREEN}✓${NC} Configuration created\n"
 
 # Install systemd service
 echo -e "${YELLOW}Installing systemd service...${NC}"
-if [ -f "$SOURCE_DIR/systemd/tailscale-monitor-agent.service" ]; then
-    cp "$SOURCE_DIR/systemd/tailscale-monitor-agent.service" /etc/systemd/system/
+if [ -f /tmp/tsmon-systemd/tailscale-monitor-agent.service ]; then
+    cp /tmp/tsmon-systemd/tailscale-monitor-agent.service /etc/systemd/system/
+    
+    # Add PYTHONPATH to service file
+    sed -i '/^Environment="PATH=/a Environment="PYTHONPATH=/opt/tailscale-monitor"' /etc/systemd/system/tailscale-monitor-agent.service
+    
     systemctl daemon-reload
     systemctl enable tailscale-monitor-agent
+    rm -rf /tmp/tsmon-systemd
     echo -e "${GREEN}✓${NC} Service installed and enabled"
 else
-    echo -e "${YELLOW}Warning: Service file not found${NC}"
+    echo -e "${RED}Error: Service file not found${NC}"
+    exit 1
 fi
 
 # Start service
