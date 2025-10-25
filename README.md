@@ -30,19 +30,20 @@ The collector will be available at `http://<tailscale-ip>:48321`
 
 ### 2. Install Agents (Monitored Machines)
 
-On each machine you want to monitor:
+On each machine you want to monitor, run this single command:
 
 ```bash
-# Get your collector's Tailscale IP first, then run:
-COLLECTOR_URL=http://100.x.x.x:48321 curl -fsSL http://100.x.x.x:48321/install/agent.sh | sudo bash
+curl -fsSL http://100.x.x.x:48321/install/agent.sh | sudo bash -s -- http://100.x.x.x:48321
 ```
 
-Or use the CLI to generate the exact command:
+Replace `100.x.x.x` with your collector's Tailscale IP.
+
+Or use the CLI to get the exact command:
 ```bash
 tsmon generate-install
 ```
 
-Agents automatically register on first run - no manual API key setup needed!
+**That's it!** The agent automatically registers on first run.
 
 ## 💻 CLI Usage
 

@@ -208,6 +208,14 @@ echo -e "  sudo systemctl start tailscale-monitor-collector"
 echo -e "  sudo journalctl -u tailscale-monitor-collector -f"
 
 echo -e "\n${YELLOW}Next Steps:${NC}"
-echo -e "  1. Run 'tsmon generate-install' to get agent installation commands"
-echo -e "  2. Install agents on machines you want to monitor"
-echo -e "  3. Run 'tsmon dashboard' to see live statistics\n"
+echo -e "  ${GREEN}✓${NC} Collector ready at: http://$TAILSCALE_IP:48321"
+echo -e ""
+echo -e "  ${BLUE}To add agents, run this on each machine:${NC}"
+if [ "$TAILSCALE_IP" != "unknown" ]; then
+    echo -e "  ${CYAN}curl -fsSL http://$TAILSCALE_IP:48321/install/agent.sh | sudo bash -s -- http://$TAILSCALE_IP:48321${NC}"
+else
+    echo -e "  ${CYAN}tsmon generate-install${NC}"
+fi
+echo -e ""
+echo -e "  Or use: ${CYAN}tsmon generate-install${NC} to see the command"
+echo -e "  Then run: ${CYAN}tsmon dashboard${NC} to view live stats\n"

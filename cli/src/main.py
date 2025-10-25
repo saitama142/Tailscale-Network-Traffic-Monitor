@@ -245,57 +245,26 @@ def dashboard(refresh: int = typer.Option(5, help="Refresh interval in seconds")
 def generate_install():
     """Generate installation command for a new agent."""
     console.print(Panel.fit(
-        "[bold cyan]Agent Installation Generator[/bold cyan]",
+        "[bold cyan]Agent Installation[/bold cyan]",
         border_style="cyan"
     ))
     
-    # Ask for OS type
-    console.print("\n[bold]Select target operating system:[/bold]")
-    console.print("  [1] Linux (Debian/Ubuntu/RHEL/etc.)")
-    console.print("  [2] Windows")
-    
-    os_choice = Prompt.ask("\nChoice", choices=["1", "2"], default="1")
-    
-    os_type = "linux" if os_choice == "1" else "windows"
     collector_url = get_collector_url()
     
-    console.print(f"\n[green]✓[/green] Selected: [cyan]{os_type.capitalize()}[/cyan]")
+    # Simplified single command
+    install_cmd = f"curl -fsSL {collector_url}/install/agent.sh | sudo bash -s -- {collector_url}"
     
-    # Show installation command
     console.print("\n[bold]Installation Command:[/bold]\n")
+    console.print(Panel(
+        install_cmd,
+        title="📦 Agent Installation (Copy & Paste)",
+        border_style="green",
+        padding=(1, 2)
+    ))
     
-    if os_type == "linux":
-        install_cmd = (
-            f"COLLECTOR_URL={collector_url} curl -fsSL {collector_url}/install/agent.sh | "
-            f"sudo bash"
-        )
-        
-        console.print(Panel(
-            install_cmd,
-            title="Linux Installation",
-            border_style="green",
-            padding=(1, 2)
-        ))
-        
-        console.print("\n[dim]On the target Linux machine, run:[/dim]")
-        console.print(f"  {install_cmd}\n")
-    else:
-        install_cmd = (
-            f"$env:COLLECTOR_URL='{collector_url}'; "
-            f"iwr -useb {collector_url}/install/agent.ps1 | iex"
-        )
-        
-        console.print(Panel(
-            install_cmd,
-            title="Windows Installation (PowerShell as Administrator)",
-            border_style="blue",
-            padding=(1, 2)
-        ))
-        
-        console.print("\n[dim]On the target Windows machine, run in PowerShell (as Admin):[/dim]")
-        console.print(f"  {install_cmd}\n")
-    
-    console.print("[yellow]Note:[/yellow] The agent will automatically register with the collector on first run.")
+    console.print("\n[dim]On the target machine, run:[/dim]")
+    console.print(f"  [cyan]{install_cmd}[/cyan]\n")
+    console.print("[yellow]Note:[/yellow] Agent automatically registers on first run\n")
 
 
 @app.command(name="install-agent")
